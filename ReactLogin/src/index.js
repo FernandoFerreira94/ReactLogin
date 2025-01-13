@@ -6,10 +6,8 @@ import reportWebVitals from "./reportWebVitals"; // Importa a função reportWeb
 const root = ReactDOM.createRoot(document.getElementById("root")); // Cria um root do ReactDOM na div com id "root".
 root.render(
   <React.StrictMode>
-    {" "}
-    {/* Envolve a aplicação em React.StrictMode para ajudar a identificar problemas no código. */}
-    <App /> {/* Renderiza o componente principal App. */}
+    <App />
   </React.StrictMode>
 );
 
-reportWebVitals(); // Chama a função reportWebVitals para iniciar a medição de desempenho da aplicação.
+reportWebVitals();
