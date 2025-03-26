@@ -1,4 +1,4 @@
-import React, { useState, FormEvent, useEffect } from 'react'
+import { useState, FormEvent, useEffect } from 'react'
 
 import styles from './home.module.css'
 import { Link, useNavigate } from 'react-router-dom'
@@ -24,7 +24,7 @@ export interface CoinProps {
   // item acrecentado
   formatedPrice?: string
   formatedMarket?: string
-  formateVolume?: string
+  formatedVolume?: string
 }
 
 export interface DataProps {
@@ -45,7 +45,7 @@ export default function Home() {
     setIsLoading(false)
     try {
       const api = Axios(offset)
-      const response = await api.get<DataProps>()
+      const response = await api.get<DataProps>('')
 
       const coinsData = response.data.data
 

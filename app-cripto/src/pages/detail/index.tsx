@@ -16,42 +16,49 @@ interface ErrorData {
 type DataProps = ResponseData | ErrorData
 
 export default function Detail() {
-  const { cripto } = useParams<string>()
+  const { cripto } = useParams()
   const [detail, setDetail] = useState<CoinProps | undefined>(undefined)
   const [isLoading, setIsLoading] = useState(false)
 
   const navigate = useNavigate()
 
   useEffect(() => {
-    getDetail(cripto)
+    getDetail(cripto!)
   }, [cripto])
 
   async function getDetail(cripto: string) {
     setIsLoading(true)
     try {
       const api = AxiosDetail(cripto)
-      const response = await api.get<DataProps>()
+      const response = await api.get<DataProps>('/')
 
-      const coinsData = response.data.data
+      if ('data' in response.data) {
+        // Verifica se o campo 'data' existe
+        const coinsData = response.data.data
 
-      const price = Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      })
+        // Processamento dos dados...
 
-      const priceCompact = Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        notation: 'compact',
-      })
-      const formatedResult = {
-        ...coinsData,
-        formatedPrice: price.format(Number(coinsData.priceUsd)),
-        formatedMarket: priceCompact.format(Number(coinsData.marketCapUsd)),
-        formatedVolume: priceCompact.format(Number(coinsData.volumeUsd24Hr)),
+        const price = Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',
+        })
+
+        const priceCompact = Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',
+          notation: 'compact',
+        })
+        const formatedResult = {
+          ...coinsData,
+          formatedPrice: price.format(Number(coinsData.priceUsd)),
+          formatedMarket: priceCompact.format(Number(coinsData.marketCapUsd)),
+          formatedVolume: priceCompact.format(Number(coinsData.volumeUsd24Hr)),
+        }
+
+        setDetail(formatedResult)
+      } else {
+        console.error('Erro na estrutura dos dados:', response.data)
       }
-
-      setDetail(formatedResult)
     } catch (error) {
       console.log(error)
       alert('Ops ocorreu um erro')
@@ -80,7 +87,7 @@ export default function Detail() {
 
               <span>Preço: {detail.formatedPrice}</span>
               <span>Mercado: {detail.formatedMarket}</span>
-              <span>Volume: {detail.formateVolume}</span>
+              <span>Volume: {detail.formatedVolume}</span>
               <span>
                 Mudança 24h:{' '}
                 <span
