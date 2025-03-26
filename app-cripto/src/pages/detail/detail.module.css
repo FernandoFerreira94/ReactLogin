@@ -1,0 +1,53 @@
+.container {
+  display: flex;
+  padding: 30px;
+  margin-top: 40px;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  color: #fff;
+}
+
+.info {
+  display: flex;
+  width: 60%;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: rgb(27, 27, 27);
+  flex-direction: column;
+  gap: 15px;
+  img {
+    width: 40px;
+  }
+}
+
+.tdProfit {
+  color: #12f98a;
+  font-weight: bold;
+}
+.tdLoss {
+  font-weight: bold;
+  color: #f91257;
+}
+
+.btnBack {
+  background-color: #30beff;
+  padding: 8px 24px;
+  color: #fff;
+  border-radius: 8px;
+  margin: 14px 0;
+  transition: all 0.3s ease-in;
+
+  &:hover {
+    transform: scale(1.03);
+  }
+}
+
+.load {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 400px;
+}

@@ -4,9 +4,10 @@ import styles from './home.module.css'
 import { Link, useNavigate } from 'react-router-dom'
 import { BsSearch } from 'react-icons/bs'
 
-import api from '../../services/api'
+import { Axios } from '../../services/Api'
 
-interface CoinProps {
+// TypeScript
+export interface CoinProps {
   // item vindo da api
   id: string
   name: string
@@ -26,21 +27,25 @@ interface CoinProps {
   formateVolume?: string
 }
 
-interface DataProps {
+export interface DataProps {
   data: CoinProps[]
 }
 
 export default function Home() {
   const [input, setInput] = useState<string>('')
   const [coins, setCoins] = useState<CoinProps[]>([])
-
+  const [offset, setOffeset] = useState<number>(10)
+  const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate()
   useEffect(() => {
-    getData()
-  }, [])
+    getData(offset)
+  }, [offset])
 
-  async function getData() {
+  async function getData(offset: number) {
+    setIsLoading(false)
     try {
-      const response: DataProps = await api.get<DataProps>()
+      const api = Axios(offset)
+      const response = await api.get<DataProps>()
 
       const coinsData = response.data.data
 
@@ -54,23 +59,23 @@ export default function Home() {
         currency: 'USD',
         notation: 'compact',
       })
+
       const formatedResult: CoinProps[] = coinsData.map((item: CoinProps) => {
         const formated = {
           ...item,
           formatedPrice: price.format(Number(item.priceUsd)),
           formatedMarket: priceCompact.format(Number(item.marketCapUsd)),
-          formateVolume: priceCompact.format(Number(item.volumeUsd24Hr)),
+          formatedVolume: priceCompact.format(Number(item.volumeUsd24Hr)),
         }
         return formated
       })
-      console.log(formatedResult)
+
       setCoins(formatedResult)
+      setIsLoading(true)
     } catch (error) {
       console.log(error)
     }
   }
-
-  const navigate = useNavigate()
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -80,7 +85,9 @@ export default function Home() {
     navigate(`/detail/${input}`)
   }
 
-  function handleGetMore() {}
+  function handleGetMore(): void {
+    setOffeset(offset + 5)
+  }
   return (
     <>
       <main className={styles.container}>
@@ -108,57 +115,66 @@ export default function Home() {
             </tr>
           </thead>
 
-          <tbody>
-            {coins.length > 0 &&
-              coins.map((item, index) => (
-                <tr className={styles.tr} key={index}>
-                  <td className={styles.tdLabel} data-label="Moeda">
-                    <div className={styles.name}>
-                      <img
-                        src={`https://assets.coincap.io/assets/icons/${item.symbol.toLowerCase()}2@2x.png`}
-                        alt="Logo Cript"
-                        className={styles.logo}
-                      />
-                      <Link
-                        to={`/detail/${item.id}`}
-                        target="_blank"
-                        className={styles.linkCoins}
-                        rel="noopener noreferrer"
+          {isLoading ? (
+            <>
+              <tbody>
+                {coins.length > 0 &&
+                  coins.map((item, index) => (
+                    <tr className={styles.tr} key={index}>
+                      <td className={styles.tdLabel} data-label="Moeda">
+                        <div className={styles.name}>
+                          <img
+                            src={`https://assets.coincap.io/assets/icons/${item.symbol.toLowerCase()}2@2x.png`}
+                            alt="Logo Cript"
+                            className={styles.logo}
+                          />
+                          <Link
+                            to={`/detail/${item.id}`}
+                            className={styles.linkCoins}
+                            rel="noopener noreferrer"
+                          >
+                            <span> {item.name}</span> | {item.symbol}
+                          </Link>{' '}
+                        </div>
+                      </td>
+
+                      <td className={styles.tdLabel} data-label="Valor mercado">
+                        {item.formatedMarket}
+                      </td>
+
+                      <td className={styles.tdLabel} data-label="Preço">
+                        {item.formatedPrice}
+                      </td>
+
+                      <td className={styles.tdLabel} data-label="Volume">
+                        {item.formatedVolume}
+                      </td>
+
+                      <td
+                        className={
+                          Number(item.changePercent24Hr) > 0
+                            ? styles.tdProfit
+                            : styles.tdLoss
+                        }
+                        data-label="Mudança 24h"
                       >
-                        <span> {item.name}</span> | {item.symbol}
-                      </Link>{' '}
-                    </div>
-                  </td>
-
-                  <td className={styles.tdLabel} data-label="Valor mercado">
-                    {item.formatedMarket}
-                  </td>
-
-                  <td className={styles.tdLabel} data-label="Preço">
-                    {item.formatedPrice}
-                  </td>
-
-                  <td className={styles.tdLabel} data-label="Volume">
-                    {item.formateVolume}
-                  </td>
-
-                  <td
-                    className={
-                      Number(item.changePercent24Hr) > 0
-                        ? styles.tdProfit
-                        : styles.tdLoss
-                    }
-                    data-label="Mudança 24h"
-                  >
-                    <span>{Number(item.changePercent24Hr).toFixed(3)}</span>
-                  </td>
-                </tr>
-              ))}
-          </tbody>
+                        <span>{Number(item.changePercent24Hr).toFixed(3)}</span>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </>
+          ) : (
+            <div className={styles.load}>
+              <h1>Carregando Coins...</h1>
+            </div>
+          )}
         </table>
-        <button className={styles.btnMore} onClick={handleGetMore}>
-          Carregar mais...
-        </button>
+        {isLoading && (
+          <button className={styles.btnMore} onClick={handleGetMore}>
+            Carregar mais...
+          </button>
+        )}
       </main>
     </>
   )
